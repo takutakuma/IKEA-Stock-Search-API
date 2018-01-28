@@ -1,11 +1,11 @@
 function doGet(e) {
-//  if(e.parameter.s){
-//    param = e.parameter.s;
-//  }else{
-//    param = "";
-//  }
+  if(e.parameter.productNo){
+    productNumber = e.parameter.productNo;
+  }else{
+    productNumber = "30339293";
+  }
 
-  var stockInfo = getStockInfoJson();
+  var stockInfo = getStockInfoJson(productNumber);
   var output = ContentService.createTextOutput();
   output.setMimeType(ContentService.MimeType.JSON);
   output.setContent(JSON.stringify(stockInfo));
@@ -13,10 +13,9 @@ function doGet(e) {
 }
 
 
-function getStockInfoJson() {
+function getStockInfoJson(productNumber) {
   //URLと対象商品
   const productURL ='http://www.ikea.com/jp/ja/iows/catalog/availability/';
-  const productNumber ='30339293'; //商品番号 本番用:30339293 テスト用:30340381
 
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = spreadsheet.getSheetByName("sheet");
@@ -35,11 +34,11 @@ function getStockInfoJson() {
   }
   
   //Jsonの作成
-  return makeJson(storeNames,stockInfo);
+  return makeJson(storeNames,stockInfo,productNumber);
   
 }
 
-function makeJson(storeNames,stockInfo) {
+function makeJson(storeNames,stockInfo,productNumber) {
 
   //店舗名と在庫情報をまとめる
   var jsonArray = [];
@@ -52,7 +51,13 @@ function makeJson(storeNames,stockInfo) {
     jsonArray.push(json);
   }
   
-  return jsonArray;
+  var data = new Object();
+  
+  data['status'] = 200;
+  data['productNo'] = productNumber;
+  data['stocks'] = jsonArray;
+  
+  return data;
 }
 
 //在庫情報の取得
